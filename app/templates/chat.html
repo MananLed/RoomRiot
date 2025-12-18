@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RoomRiot | Chat</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+  <div style="display:flex;height:100vh;">
+
+    <!-- Members -->
+    <div style="width:240px;background:#020617;padding:16px;">
+      <h3>Members</h3>
+      <ul id="member-list" style="list-style:none;margin-top:16px;"></ul>
+    </div>
+
+    <!-- Chat -->
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div id="messages" style="flex:1;padding:20px;overflow-y:auto;"></div>
+
+      <div style="padding:16px;border-top:1px solid #1e293b;">
+        <input id="message-input" placeholder="Type your message...">
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/js/chat.js"></script>
+</body>
+</html>

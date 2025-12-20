@@ -22,6 +22,8 @@ class RoomMember(db.Model):
     blocked = db.Column(db.Boolean, default=False)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    user = db.relationship("User", backref="room_members")
+
     __table_args__ = (
         db.UniqueConstraint("room_id", "user_id", name="unique_room_user"),
     )

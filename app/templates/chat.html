@@ -3,28 +3,40 @@
 <head>
   <title>RoomRiot | Chat</title>
   <link rel="stylesheet" href="/static/css/main.css">
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    .sidebar { width: 240px; background:#020617; padding:16px; color:white; display:flex; flex-direction:column; }
+    .sidebar h3 { margin-top:0; }
+    .members { flex:1; overflow-y:auto; margin-top:16px; }
+    .members li { display:flex; justify-content: space-between; align-items:center; padding:4px 0; }
+    .chat-area { flex:1; display:flex; flex-direction:column; }
+    #messages { flex:1; padding:20px; overflow-y:auto; background:#0d1117; color:white; }
+    #message-input { width:100%; padding:8px; box-sizing:border-box; }
+    .member-actions button { margin-left:5px; }
+    .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .system-msg { color: #999; font-style: italic; }
+  </style>
 </head>
 <body>
   <div style="display:flex;height:100vh;">
-
-    <!-- Members -->
-    <div style="width:240px;background:#020617;padding:16px;">
-      <h3>Members</h3>
-      <ul id="member-list" style="list-style:none;margin-top:16px;"></ul>
+    <div class="sidebar">
+      <div class="top-bar">
+        <h3>Members</h3>
+        <button id="leaveRoomBtn">Leave</button>
+      </div>
+      <ul id="member-list" class="members"></ul>
     </div>
 
-    <!-- Chat -->
-    <div style="flex:1;display:flex;flex-direction:column;">
-      <div id="messages" style="flex:1;padding:20px;overflow-y:auto;"></div>
-
-      <div style="padding:16px;border-top:1px solid #1e293b;">
-        <input id="message-input" placeholder="Type your message...">
+    <div class="chat-area">
+      <div id="messages"></div>
+      <div style="padding:16px;border-top:1px solid #1e293b; display:flex; align-items:center;">
+        <input id="message-input" placeholder="Type your message..." style="flex:1; padding:8px; box-sizing:border-box;">
+        <button id="sendBtn" title="Send Message" type="button" style="margin-left:8px; padding:8px 12px; cursor:pointer;">▶</button>
       </div>
     </div>
-
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="/static/js/chat.js"></script>
 </body>
 </html>

@@ -7,9 +7,10 @@ def create_room(name, owner_id, password=None):
     if existing:
         return None, "Room name already exists"
 
-    password_hash = None
-    if password:
+    if password is not None and password.strip() != "":
         password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+    else:
+        password_hash = None
 
     room = Room(
         name=name,
@@ -20,7 +21,6 @@ def create_room(name, owner_id, password=None):
     db.session.add(room)
     db.session.commit()
 
-    # Owner automatically joins room
     member = RoomMember(
         room_id=room.id,
         user_id=owner_id
@@ -37,13 +37,14 @@ def join_room(room, user_id, password=None):
         user_id=user_id
     ).first()
 
-    if membership:
+
+    if membership is not None:
         if membership.blocked:
             return None, "You are blocked from this room"
         return membership, None
 
-    if room.password_hash:
-        if not password or not bcrypt.check_password_hash(room.password_hash, password):
+    if room.password_hash is not None:
+        if password is None or not bcrypt.check_password_hash(room.password_hash, password):
             return None, "Invalid room password"
 
     member = RoomMember(

@@ -6,26 +6,30 @@
 </head>
 <body>
   <div style="max-width:900px;margin:40px auto;">
-    <h1>🔥 RoomRiot</h1>
-    <p style="color:var(--muted);margin-bottom:24px;">
-      Create or join a room
-    </p>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h1>🔥 RoomRiot</h1>
+        <p style="color:var(--muted);margin-bottom:24px;">
+          Create or join a room
+        </p>
+      </div>
+      <button id="logoutBtn" style="height:40px; background-color: red;">Logout</button>
+    </div>
 
     <div class="card" style="margin-bottom:30px;">
       <h3>Create Room</h3>
       <br>
-      <input placeholder="Room name">
+      <input id="roomName" placeholder="Room name">
       <br><br>
-      <input placeholder="Password (optional)">
+      <input id="password" placeholder="Password (optional)">
       <br><br>
-      <button>Create</button>
+      <button id="createRoomButton">Create</button>
     </div>
 
     <div class="card">
       <h3>Available Rooms</h3>
-      <ul id="room-list" style="list-style:none;margin-top:16px;">
-        <!-- rooms will be injected -->
-      </ul>
+      <ul id="room-list" style="list-style:none;margin-top:16px;"></ul>
     </div>
   </div>
 

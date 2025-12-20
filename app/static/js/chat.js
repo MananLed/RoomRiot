@@ -5,63 +5,102 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Get room ID from URL
   const roomId = window.location.pathname.split("/").pop();
   const messagesEl = document.getElementById("messages");
   const memberListEl = document.getElementById("member-list");
   const inputEl = document.getElementById("message-input");
+  const leaveBtn = document.getElementById("leaveRoomBtn");
 
-  // Connect SocketIO with JWT
+  let userId = null;
+
   const socket = io({ auth: { token } });
 
   socket.on("connect", () => {
-    socket.emit("join_room", { room_id: roomId, user_id: null }); // user_id backend extracts from token
+    console.log("Connected to server");
   });
 
-  // Receive previous messages
+  socket.on("connected", (data) => {
+    userId = data.user_id;
+    socket.emit("join_room", { room_id: roomId, user_id: userId });
+  });
+
   socket.on("message_history", (messages) => {
-    messages.forEach((msg) => {
-      appendMessage(msg.username, msg.content, msg.timestamp);
-    });
+    messagesEl.innerHTML = "";
+    messages.forEach((msg) =>
+      appendMessage(msg.username, msg.content, msg.timestamp)
+    );
   });
 
-  // Receive new messages
   socket.on("new_message", (msg) => {
-    appendMessage(msg.username, msg.content, msg.timestamp);
+    appendMessage(msg.username, msg.content, msg.timestamp, msg.system || false);
   });
 
-  // Kicked / blocked
-  socket.on("force_leave", (data) => {
+  socket.on("user_joined", (data) => {
+    appendMessage("System", `${data.username} joined the chat`, "", true);
+    loadMembers();
+  });
+
+  socket.on("user_left", (data) => {
+    appendMessage("System", `${data.username} left the chat`, "", true);
+    loadMembers();
+  });
+
+  socket.on("kicked", () => {
     alert("You were removed from the room");
-    window.location.href = "/dashboard";
+    window.location.href = "/api/rooms/dashboard";
   });
 
-  // Room deleted
-  socket.on("room_deleted", (data) => {
-    alert("This room was deleted by the owner");
-    window.location.href = "/dashboard";
+  socket.on("blocked", () => {
+    alert("You were blocked from this room");
+    window.location.href = "/api/rooms/dashboard";
   });
 
-  // Send message
+  socket.on("room_deleted", () => {
+    alert("Room deleted by owner");
+    window.location.href = "/api/rooms/dashboard";
+  });
+
   inputEl.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       const content = inputEl.value.trim();
       if (content) {
-        socket.emit("send_message", { room_id: roomId, content });
+        socket.emit("send_message", {
+          room_id: roomId,
+          user_id: userId,
+          content,
+        });
         inputEl.value = "";
       }
     }
   });
 
-  // Helper function
-  function appendMessage(username, content, timestamp) {
+  const sendBtn = document.getElementById("sendBtn");
+  sendBtn.addEventListener("click", () => {
+    const content = inputEl.value.trim();
+    if (content) {
+      socket.emit("send_message", {
+        room_id: roomId,
+        user_id: userId,
+        content,
+      });
+      inputEl.value = "";
+    }
+  });
+
+  leaveBtn.addEventListener("click", () => {
+    socket.emit("leave_room", { room_id: roomId, user_id: userId });
+    window.location.href = "/api/rooms/dashboard";
+  });
+
+  function appendMessage(username, content, timestamp, isSystem = false) {
     const div = document.createElement("div");
-    div.innerHTML = `<strong>${username}</strong> [${timestamp}]: ${content}`;
+    div.innerHTML = isSystem
+      ? `<span class="system-msg">${content}</span>`
+      : `<strong>${username}</strong> [${timestamp}]: ${content}`;
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  // Load members periodically (or via socket update)
   async function loadMembers() {
     try {
       const res = await fetch(`/api/rooms/${roomId}/members`, {
@@ -72,6 +111,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       members.forEach((m) => {
         const li = document.createElement("li");
         li.textContent = `${m.username} ${m.blocked ? "(Blocked)" : ""}`;
+
+        const actions = document.createElement("span");
+        actions.className = "member-actions";
+
+        const kickBtn = document.createElement("button");
+        kickBtn.textContent = "🥾";
+        kickBtn.title = "Kick Out"
+        kickBtn.addEventListener("click", () => kickUser(m.user_id));
+
+        const blockBtn = document.createElement("button");
+        blockBtn.textContent = "🚫";
+        blockBtn.title = "Block"
+        blockBtn.addEventListener("click", () => blockUser(m.user_id));
+
+        actions.appendChild(kickBtn);
+        actions.appendChild(blockBtn);
+        li.appendChild(actions);
+
         memberListEl.appendChild(li);
       });
     } catch (err) {
@@ -79,6 +136,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  async function kickUser(targetId) {
+    await fetch(`/api/rooms/${roomId}/kick`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user_id: targetId }),
+    });
+    loadMembers();
+  }
+
+  async function blockUser(targetId) {
+    await fetch(`/api/rooms/${roomId}/block`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user_id: targetId }),
+    });
+    loadMembers();
+  }
+
   loadMembers();
-  setInterval(loadMembers, 5000); // Refresh member list every 5s
+  setInterval(loadMembers, 5000);
 });

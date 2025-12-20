@@ -6,11 +6,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const roomListEl = document.getElementById("room-list");
-  const createBtn = document.querySelector(".card button");
-  const nameInput = document.querySelector(".card input:nth-child(2)");
-  const passwordInput = document.querySelector(".card input:nth-child(4)");
+  const createBtn = document.getElementById("createRoomButton");
+  const nameInput = document.getElementById("roomName");
+  const passwordInput = document.getElementById("password");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-  // Load existing rooms
   async function loadRooms() {
     try {
       const res = await fetch("/api/rooms", {
@@ -28,7 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <button style="margin-left:10px;">Join</button>
         `;
         const joinBtn = li.querySelector("button");
-        joinBtn.addEventListener("click", () => joinRoom(room.id, room.password));
+        joinBtn.addEventListener("click", () =>
+          joinRoom(room.id, !!room.password)
+        );
         roomListEl.appendChild(li);
       });
     } catch (err) {
@@ -37,36 +39,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Join room
   async function joinRoom(roomId, hasPassword) {
     let pwd = "";
     if (hasPassword) {
       pwd = prompt("Enter room password:");
-      if (pwd === null) return; // Cancelled
+      if (pwd === null) return;
     }
 
-    try {
-      const res = await fetch(`/api/rooms/${roomId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ password: pwd }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        window.location.href = `/chat/${roomId}`;
-      } else {
-        alert(data.error || "Failed to join room");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error joining room");
+    const res = await fetch(`/api/rooms/${roomId}/join`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ password: pwd }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      window.location.href = `/api/rooms/chat/${roomId}`;
+    } else {
+      alert(data.error || "Failed to join room");
     }
   }
 
-  // Create room
   createBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const pwd = passwordInput.value.trim();
@@ -77,13 +74,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const res = await fetch("/api/rooms", {
+      const res = await fetch("/api/rooms/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, password: pwd || null }),
+        body: JSON.stringify({ name, password: pwd}),
       });
       const data = await res.json();
       if (res.ok) {
@@ -100,6 +97,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Initial load
   loadRooms();
+});
+
+
+logoutBtn.addEventListener("click", () => {
+  localStorage.clear()
+  window.location.href = "/api/auth/login";
 });

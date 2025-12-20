@@ -11,6 +11,8 @@ from app.services.moderation_service import (
 )
 from app.extensions import socketio
 from app.extensions import db, socketio
+from datetime import datetime
+from app.models.room_member import RoomMember
 
 
 room_bp = Blueprint("rooms", __name__)
@@ -28,6 +30,7 @@ def chat_page(room_id):
 def list_rooms():
     rooms = Room.query.all()
     return [{
+        "id": room.id,
         "name": room.name,
         "password": bool(room.password_hash)
     } for room in rooms]
@@ -54,14 +57,13 @@ def create():
     }, 201
 
 
-@room_bp.route("/join", methods=["POST"])
+@room_bp.route("/<room_id>/join", methods=["POST"])
 @jwt_required_custom
-def join():
+def join(room_id):
     data = request.get_json()
-    room_name = data.get("name")
     password = data.get("password")
 
-    room = Room.query.filter_by(name=room_name).first()
+    room = Room.query.get(room_id)
     if not room:
         return {"error": "Room not found"}, 404
 
@@ -74,7 +76,7 @@ def join():
     return {
         "room_id": room.id,
         "room_name": room.name
-    }
+    }, 200
 
 @room_bp.route("/<room_id>/members", methods=["GET"])
 @jwt_required_custom
@@ -86,13 +88,15 @@ def members(room_id):
         return {"error": "Room not found"}, 404
     if not owner:
         return {"error": "Forbidden"}, 403
+    else:
+        owner_of_room = user_id
 
     members = get_room_members(room_id)
     return [{
     "user_id": m.user_id,
     "username": User.query.get(m.user_id).username,
     "blocked": m.blocked
-    } for m in members]
+    } for m in members if m.user_id != owner_of_room and m.blocked != 1] 
 
 @room_bp.route("/<room_id>/kick", methods=["POST"])
 @jwt_required_custom
@@ -105,13 +109,31 @@ def kick(room_id):
         return {"error": "Room not found"}, 404
     if not owner:
         return {"error": "Forbidden"}, 403
+    
+    member = RoomMember.query.filter_by(
+        room_id=room_id,
+        user_id=target_user_id
+    ).first()
 
+    username = member.user.username
     success = kick_user(room_id, target_user_id)
     if not success:
         return {"error": "User not in room"}, 404
     
+    
     socketio.emit(
-    "force_leave",
+        "new_message",
+        {
+            "username": "System",
+            "content": f"{username} was kicked from the room",
+            "timestamp": datetime.utcnow().strftime("%H:%M"),
+            "system": True
+        },
+        room=room_id
+    )
+    
+    socketio.emit(
+    "kicked",
     {"room_id": room_id},
     room=target_user_id
     )
@@ -129,14 +151,32 @@ def block(room_id):
         return {"error": "Room not found"}, 404
     if not owner:
         return {"error": "Forbidden"}, 403
+    
+    member = RoomMember.query.filter_by(
+        room_id=room_id,
+        user_id=target_user_id
+    ).first()
 
+    username = member.user.username
     success = block_user(room_id, target_user_id)
 
     if not success:
         return {"error": "User not in room"}, 404
+    
+    
+    socketio.emit(
+        "new_message",
+        {
+            "username": "System",
+            "content": f"{username} was blocked from the room",
+            "timestamp": datetime.utcnow().strftime("%H:%M"),
+            "system": True
+        },
+        room=room_id
+    )
 
     socketio.emit(
-    "force_leave",
+    "blocked",
     {"room_id": room_id},
     room=target_user_id
     )

@@ -55,3 +55,36 @@ input {
   padding: 24px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
+
+.message {
+  max-width: 60%;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  background-color: #1f2937;
+  color: white;
+  word-wrap: break-word;
+}
+
+.message .meta {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+.message.user {
+  align-self: flex-start;
+  background-color: #0f172a;
+}
+
+.message.self {
+  align-self: flex-end;
+  background-color: #2563eb;
+}
+
+.system-msg {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+  margin: 8px 0;
+}

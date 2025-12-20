@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const createBtn = document.getElementById("createRoomButton");
   const nameInput = document.getElementById("roomName");
   const passwordInput = document.getElementById("password");
-  const logoutBtn = document.getElementById("logoutBtn");
 
   async function loadRooms() {
     try {
@@ -22,15 +21,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       rooms.forEach((room) => {
         const li = document.createElement("li");
         li.style.marginBottom = "10px";
-        li.innerHTML = `
-          ${room.name} 
-          ${room.password ? "(🔒)" : "(🌐)"} 
-          <button style="margin-left:10px;">Join</button>
-        `;
-        const joinBtn = li.querySelector("button");
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.alignItems = "center";
+
+        const left = document.createElement("span");
+        left.textContent = `${room.name} ${room.password ? "🔒" : "🌐"}`;
+
+        const joinBtn = document.createElement("button");
+        joinBtn.textContent = "Join";
         joinBtn.addEventListener("click", () =>
           joinRoom(room.id, !!room.password)
         );
+
+        li.appendChild(left);
+        li.appendChild(joinBtn);
         roomListEl.appendChild(li);
       });
     } catch (err) {
@@ -80,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, password: pwd}),
+        body: JSON.stringify({ name, password: pwd }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -100,8 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadRooms();
 });
 
-
 logoutBtn.addEventListener("click", () => {
-  localStorage.clear()
+  localStorage.clear();
   window.location.href = "/api/auth/login";
 });

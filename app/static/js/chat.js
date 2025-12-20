@@ -32,7 +32,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   socket.on("new_message", (msg) => {
-    appendMessage(msg.username, msg.content, msg.timestamp, msg.system || false);
+    appendMessage(
+      msg.username,
+      msg.content,
+      msg.timestamp,
+      msg.system || false
+    );
   });
 
   socket.on("user_joined", (data) => {
@@ -94,9 +99,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function appendMessage(username, content, timestamp, isSystem = false) {
     const div = document.createElement("div");
-    div.innerHTML = isSystem
-      ? `<span class="system-msg">${content}</span>`
-      : `<strong>${username}</strong> [${timestamp}]: ${content}`;
+
+    if (isSystem) {
+      // System message (centered)
+      div.className = "system-msg";
+      div.textContent = content;
+    } else {
+      // Chat message
+      div.className = "message";
+
+      // Optional: different color if self message
+      if (username === "You") {
+        div.classList.add("self");
+      } else {
+        div.classList.add("user");
+      }
+
+      // Message HTML: text + meta info
+      div.innerHTML = `
+      <div class="content">${content}</div>
+      <div class="meta">${username} • ${timestamp}</div>
+    `;
+    }
+
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -108,6 +133,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
       const members = await res.json();
       memberListEl.innerHTML = "";
+
+      if (members.length == 0 || members.error) {
+        document.getElementById("membersTitle").style.display = "none";
+      }
+
       members.forEach((m) => {
         const li = document.createElement("li");
         li.textContent = `${m.username} ${m.blocked ? "(Blocked)" : ""}`;
@@ -117,12 +147,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const kickBtn = document.createElement("button");
         kickBtn.textContent = "🥾";
-        kickBtn.title = "Kick Out"
+        kickBtn.title = "Kick Out";
         kickBtn.addEventListener("click", () => kickUser(m.user_id));
 
         const blockBtn = document.createElement("button");
         blockBtn.textContent = "🚫";
-        blockBtn.title = "Block"
+        blockBtn.title = "Block";
         blockBtn.addEventListener("click", () => blockUser(m.user_id));
 
         actions.appendChild(kickBtn);

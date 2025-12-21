@@ -1,17 +1,8 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
 from app.services.auth_service import create_user, authenticate_user
 
 auth_bp = Blueprint("auth", __name__)
-
-@auth_bp.route("/login", methods=["GET"])
-def login_page():
-    return render_template("auth/login.html")
-
-@auth_bp.route("/signup", methods=["GET"])
-def signup_page():
-    return render_template("auth/signup.html")
-
 
 @auth_bp.route("/signup", methods=["POST"])
 def signup():

@@ -17,14 +17,6 @@ from app.models.room_member import RoomMember
 
 room_bp = Blueprint("rooms", __name__)
 
-@room_bp.route("/dashboard")
-def dashboard_page():
-    return render_template("dashboard.html")
-
-@room_bp.route("/chat/<room_id>")
-def chat_page(room_id):
-    return render_template("chat.html", room_id=room_id)
-
 @room_bp.route("", methods=["GET"])
 @jwt_required_custom
 def list_rooms():

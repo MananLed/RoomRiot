@@ -16,8 +16,10 @@ def create_app():
     from .routes.auth_routes import auth_bp
     from .routes.room_routes import room_bp
     from .routes.main_routes import main_bp
+    from .routes.front_routes import front_bp
     
     app.register_blueprint(main_bp)
+    app.register_blueprint(front_bp)
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(room_bp, url_prefix="/api/rooms")
 

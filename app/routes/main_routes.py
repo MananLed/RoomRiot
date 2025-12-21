@@ -4,4 +4,4 @@ main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def index():
-    return redirect(url_for("auth.login_page"))  # redirect to login page
+    return redirect(url_for("front.login_page"))

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = "login";
+    window.location.href = "/login";
     return;
   }
 
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const data = await res.json();
 
     if (res.ok) {
-      window.location.href = `/api/rooms/chat/${roomId}`;
+      window.location.href = `/chat/${roomId}`;
     } else {
       alert(data.error || "Failed to join room");
     }
@@ -107,5 +107,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 logoutBtn.addEventListener("click", () => {
   localStorage.clear();
-  window.location.href = "/api/auth/login";
+  window.location.href = "/login";
 });

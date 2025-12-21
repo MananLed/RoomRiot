@@ -52,17 +52,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   socket.on("kicked", () => {
     alert("You were removed from the room");
-    window.location.href = "/api/rooms/dashboard";
+    window.location.href = "/dashboard";
   });
 
   socket.on("blocked", () => {
     alert("You were blocked from this room");
-    window.location.href = "/api/rooms/dashboard";
+    window.location.href = "/dashboard";
   });
 
   socket.on("room_deleted", () => {
     alert("Room deleted by owner");
-    window.location.href = "/api/rooms/dashboard";
+    window.location.href = "/dashboard";
   });
 
   inputEl.addEventListener("keypress", (e) => {
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   leaveBtn.addEventListener("click", () => {
     socket.emit("leave_room", { room_id: roomId, user_id: userId });
-    window.location.href = "/api/rooms/dashboard";
+    window.location.href = "/dashboard";
   });
 
   function appendMessage(username, content, timestamp, isSystem = false) {

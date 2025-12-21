@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Determine page type: login or signup
   const isLoginPage = window.location.pathname.includes("login");
 
-  // Select the main button
   const btn = document.querySelector("button");
 
   btn.addEventListener("click", async () => {
@@ -21,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
       url = "/api/auth/login";
       body = { username, password };
     } else {
-      // Signup page
       const confirm = document.getElementById("confirm-password").value.trim();
       if (password !== confirm) {
         alert("Passwords do not match");
@@ -42,16 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (res.ok) {
         if (isLoginPage) {
-          // Login success → store JWT and go to dashboard
           localStorage.setItem("token", data.access_token);
-          window.location.href = "/api/rooms/dashboard";
+          window.location.href = "/dashboard";
         } else {
-          // Signup success → redirect to login
           alert("Signup successful! Please login.");
-          window.location.href = "login";
+          window.location.href = "/login";
         }
       } else {
-        // API returned an error
         alert(data.error || "An error occurred");
       }
     } catch (err) {

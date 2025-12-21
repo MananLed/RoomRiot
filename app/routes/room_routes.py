@@ -1,6 +1,6 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request
 from app.models.room import Room
-from app.services.room_service import create_room, join_room
+from app.services.room_service import create_room, join_room, check_membership
 from app.utils.jwt_required import jwt_required_custom, get_current_user_id
 from app.models.user import User
 from app.services.moderation_service import (
@@ -47,6 +47,24 @@ def create():
         "room_id": room.id,
         "room_name": room.name
     }, 201
+
+@room_bp.route("/<room_id>/member", methods=["GET"])
+@jwt_required_custom
+def is_member(room_id):
+    user_id = get_current_user_id()
+
+    room = Room.query.get(room_id)
+    if not room:
+        return {"error": "Room not found"}, 404
+    
+    is_a_member, error = check_membership(room, user_id)
+
+    if error:
+        return {"error": error}, 403
+
+    return {
+        "isMember":is_a_member
+    }, 200
 
 
 @room_bp.route("/<room_id>/join", methods=["POST"])

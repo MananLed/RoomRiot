@@ -46,7 +46,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function joinRoom(roomId, hasPassword) {
     let pwd = "";
-    if (hasPassword) {
+
+    const res1 = await fetch(`/api/rooms/${roomId}/member`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+
+    const data1 = await res1.json();
+
+    if (hasPassword && !data1.isMember) {
       pwd = prompt("Enter room password:");
       if (pwd === null) return;
     }

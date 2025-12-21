@@ -30,6 +30,20 @@ def create_room(name, owner_id, password=None):
 
     return room, None
 
+def check_membership(room, user_id):
+    membership = RoomMember.query.filter_by(
+        room_id=room.id,
+        user_id=user_id
+    ).first()
+
+
+    if membership is not None:
+        if membership.blocked:
+            return None, "You are blocked from this room"
+        return True, None
+    
+    return False, None
+
 
 def join_room(room, user_id, password=None):
     membership = RoomMember.query.filter_by(

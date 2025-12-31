@@ -43,8 +43,7 @@ def register_socket_events(socketio):
             return
 
         join_room(room_id)
-
-        # Load last 100 messages
+        
         messages = (
             Message.query
             .filter_by(room_id=room_id)

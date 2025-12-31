@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let userId = null;
 
-  const socket = io({ auth: { token } });
+  const socket = io({ auth: { token } }); 
 
   socket.on("connect", () => {
     console.log("Connected to server");
@@ -101,21 +101,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const div = document.createElement("div");
 
     if (isSystem) {
-      // System message (centered)
+
       div.className = "system-msg";
       div.textContent = content;
     } else {
-      // Chat message
+
       div.className = "message";
 
-      // Optional: different color if self message
       if (username === "You") {
         div.classList.add("self");
       } else {
         div.classList.add("user");
       }
 
-      // Message HTML: text + meta info
       div.innerHTML = `
       <div class="content">${content}</div>
       <div class="meta">${username} • ${timestamp}</div>

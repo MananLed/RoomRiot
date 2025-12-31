@@ -10,10 +10,10 @@ def login_page():
 def signup_page():
     return render_template("auth/signup.html")
 
-@front_bp.route("/dashboard")
+@front_bp.route("/dashboard", methods=["GET"])
 def dashboard_page():
     return render_template("dashboard.html")
 
-@front_bp.route("/chat/<room_id>")
+@front_bp.route("/chat/<room_id>", methods=["GET"])
 def chat_page(room_id):
     return render_template("chat.html", room_id=room_id)
